@@ -1,0 +1,36 @@
+{
+  "name": "cdyun/thinkphp-swagger",
+  "description": "TP plugin cdyun/thinkphp-swagger",
+  "license": "MIT",
+  "keywords": [
+    "php",
+    "swagger",
+    "cdyun"
+  ],
+  "authors": [
+    {
+      "name": "cdyun",
+      "email": "121625706@qq.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "topthink/framework": "^6.0|^8.0",
+    "zircote/swagger-php": "^6.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Cdyun\\ThinkphpSwagger\\": "src/"
+    }
+  },
+  "extra": {
+      "think": {
+          "services": [
+              "Cdyun\\ThinkphpSwagger\\SwaggerService"
+          ],
+          "config":{
+              "swagger": "src/config.php"
+          }            
+      }
+  }
+}
