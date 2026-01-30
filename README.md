@@ -18,7 +18,28 @@ composer require cdyun/thinkphp-swagger
     }
 },
 ```
-实现系统初始化过程中自动注册SwaggerService服务
+实现系统初始化过程中自动注册SwaggerService服务：
+```
+<?php
+namespace Cdyun\ThinkphpSwagger;
+
+use think\Route;
+use think\Service;
+
+class SwaggerService extends Service
+{
+    public function boot()
+    {
+        // 注册路由
+        $this->registerRoutes(function (Route $route) {
+            // 获取swagger Json信息，http://xxx.com/swagger/openapi.json
+            $route->get('swagger/openapi', '\\Cdyun\\ThinkphpSwagger\\SwaggerController@openapi')->ext('json');
+            // 访问swagger页面，http://xxx.com/swagger
+            $route->get('swagger', '\\Cdyun\\ThinkphpSwagger\\SwaggerController@index');
+        });
+    }
+}
+```
 
 ### - （配置文件）config/swagger.php
 ```PHP
