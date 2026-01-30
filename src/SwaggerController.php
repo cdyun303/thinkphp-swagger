@@ -19,8 +19,9 @@ class SwaggerController
      * @author cdyun(121625706@qq.com)
      * @date 2025/11/3 1:30
      */
-    public function index()
-    {        
+    public function index(Swagger $wagger)
+    {
+        $urls = json_encode($wagger->getUrls(), JSON_UNESCAPED_UNICODE);
         $template = '
 <html lang="zh-cn">
   <head>
@@ -37,7 +38,7 @@ class SwaggerController
   <script>
     window.onload = () => {
       window.ui = SwaggerUIBundle({
-        url: "/swagger/openapi.json",
+        urls: ' . $urls . ',
         dom_id: "#swagger-ui",
         deepLinking: true,
         presets: [
@@ -62,12 +63,14 @@ class SwaggerController
      * @author cdyun(121625706@qq.com)
      * @date 2025/11/3 1:30
      */
-    public function openapi()
+    public function openapi(Swagger $wagger)
     {
-        $openapi = (new Generator())->generate([app()->getRootPath() . 'app/v2']);
+        $name = request()->param('urls_primaryName');
+        $info = $wagger->getUrlInfo($name);
+        $openapi = (new Generator())->generate([app()->getRootPath() . 'app/'. $info['name']], null, true);
         $openapi->info = new Info([
-            'title' => 'V1应用接口文档',
-            'description' => '让开发更简单、更通用、更流行。',
+            'title' => $info['title'],
+            'description' => $info['description'],
         ]);
         header('Content-Type: application/json');
         return json($openapi);
