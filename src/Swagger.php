@@ -14,21 +14,6 @@ use think\Config;
 class Swagger
 {
     /**
-     * @var Config|null
-     */
-    private $config = null;
-
-    /**
-     * 架构方法 设置参数
-     * @access public
-     * @param Config $config
-     */
-    public function __construct(Config $config)
-    {
-        $this->config = $config;
-    }
-
-    /**
      * 获取Swagger API文档的URL列表
      * @return array
      */
@@ -47,14 +32,12 @@ class Swagger
      * @param string|null $config
      * @return mixed
      */
-    protected function configure(?string $config = null): mixed
+    public function configure(?string $name = null, $default = null): mixed
     {
-        if (is_null($config)) {
-            $val = $this->config->get('swagger', []);
-        } else {
-            $val = $this->config->get('swagger.' . $config, []);
+        if (!is_null($name)) {
+            return config('swagger.' . $name, $default);
         }
-        return $val;
+        return config('swagger');
     }
 
 

@@ -19,9 +19,9 @@ class SwaggerController
      * @author cdyun(121625706@qq.com)
      * @date 2025/11/3 1:30
      */
-    public function index(Swagger $wagger)
+    public function index()
     {
-        $urls = json_encode($wagger->getUrls(), JSON_UNESCAPED_UNICODE);
+        $urls = json_encode((new Swagger())->getUrls(), JSON_UNESCAPED_UNICODE);
         $template = '
 <html lang="zh-cn">
   <head>
@@ -63,16 +63,28 @@ class SwaggerController
      * @author cdyun(121625706@qq.com)
      * @date 2025/11/3 1:30
      */
-    public function openapi(Swagger $wagger)
+    public function openapi()
     {
+        $debug = config('app.debug', false);
+        $customProcessors = [
+            new \Cdyun\ThinkphpSwagger\Processors\AutoAuthProcessor(),
+            new \Cdyun\ThinkphpSwagger\Processors\AutoPaginationProcessor(),
+            new \Cdyun\ThinkphpSwagger\Processors\AutoResponseProcessor(),
+            new \Cdyun\ThinkphpSwagger\Processors\AutoFormProcessor(),
+        ];
         $name = request()->param('urls_primaryName');
-        $info = $wagger->getUrlInfo($name);
-        $openapi = (new Generator())->generate([app()->getRootPath() . 'app/'. $info['name']], null, true);
-        $openapi->info = new Info([
-            'title' => $info['title'],
-            'description' => $info['description'],
-        ]);
+        $info = (new Swagger())->getUrlInfo($name);
+        $result = (new \OpenApi\Builder())
+            ->withGenerator(function (Generator $generator) use ($customProcessors): void {
+                foreach ($customProcessors as $processor) {
+                    $generator->getProcessorPipeline()->add($processor);
+                }
+            })
+            ->addSource([app()->getRootPath() . 'app/' . $info['name']])
+            ->build();
+
         header('Content-Type: application/json');
-        return json($openapi);
+        echo $result->toJson();
+        return;
     }
 }
