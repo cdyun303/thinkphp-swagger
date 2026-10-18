@@ -37,7 +37,7 @@ final class ResponseSchema
                 type: 'object',
                 properties: [
                     new OA\Property(property: 'items', type: 'array', items: new OA\Items(type: 'object')),
-                    new OA\Property(property: 'total', type: 'integer', example: 100),
+                    new OA\Property(property: 'total', type: 'integer', example: 0),
                 ],
             );
         } else {
