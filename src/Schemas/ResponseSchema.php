@@ -11,6 +11,7 @@ namespace Cdyun\ThinkphpSwagger\Schemas;
 
 use Cdyun\ThinkphpSwagger\Swagger;
 use OpenApi\Attributes as OA;
+use OpenApi\Undefined;
 
 /**
  * 响应 Schema
@@ -23,7 +24,7 @@ final class ResponseSchema
     /**
      * 统一响应包装格式 Schema：{code, message, data}.
      */
-    public static function success(bool $page = false): OA\Schema
+    public static function success(bool $page = false, mixed $data = null): OA\Schema
     {
         $swagger = new Swagger();
         $code ??= $swagger->configure('processor.response.code.success', self::SUCCESS_CODE);
@@ -41,7 +42,15 @@ final class ResponseSchema
                 ],
             );
         } else {
-            $properties[] = new OA\Property(property: 'data', type: 'object');
+            if ($data !== null && is_array($data) && $data !== []) {
+                $properties[] = new OA\Property(
+                    property: 'data',
+                    type: 'object',
+                    properties: self::buildProperty($data, []),
+                );
+            } else {
+                $properties[] = new OA\Property(property: 'data', type: 'object');
+            }
         }
         return new OA\Schema(
             type: 'object',
@@ -63,5 +72,49 @@ final class ResponseSchema
                 new OA\Property(property: 'message', type: 'string', example: '操作失败'),
             ],
         );
+    }
+
+
+    /**
+     * 构建data数据 Property.
+     */
+    private static function buildProperty(array $data, array $schema)
+    {
+        foreach ($data as $key => $vo) {
+            if (!$vo['property'] || !$vo['type']) {
+                throw new \RuntimeException('缺少属性或类型');
+            }
+
+            $example = $vo['example'] ?? Undefined::UNDEFINED;
+            $description = $vo['description'] ?? Undefined::UNDEFINED;
+            $properties = $vo['properties'] ?? null;
+
+            if ($vo['type'] === 'array') {
+                $schema[] = new OA\Property(
+                    property: $vo['property'],
+                    type: $vo['type'],
+                    example: $example,
+                    description: $description,
+                    items: new OA\Items(type: 'object'),
+                );
+            } else if ($properties && is_array($properties) && $properties !== []) {
+                $schema[] = new OA\Property(
+                    property: $vo['property'],
+                    type: $vo['type'],
+                    example: $example,
+                    description: $description,
+                    properties: self::buildProperty($properties, []),
+                );
+            } else {
+                $schema[] = new OA\Property(
+                    property: $vo['property'],
+                    type: $vo['type'],
+                    example: $example,
+                    description: $description,
+                );
+            }
+        }
+
+        return $schema;
     }
 }

@@ -53,9 +53,10 @@ final class AutoResponseProcessor extends BaseAutoProcessor
         $httpCode = $useResponse?->httpCode ?? 200;
         $description = $useResponse?->description ?? '业务状态：成功';
         $page = $useResponse?->page ?? false;
+        $data = $useResponse?->data ?? null;
         $context = new Context(['generated' => true], $operation->_context);
 
-        $schema = ResponseSchema::success($page);
+        $schema = ResponseSchema::success($page, $data);
         $mediaType = new OA\MediaType([
             'schema' => $schema,
             'mediaType' => 'application/json',

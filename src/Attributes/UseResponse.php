@@ -19,6 +19,7 @@ class UseResponse
         public readonly ?int    $httpCode = null, // 状态码
         public readonly ?string $description = null, // 描述
         public readonly ?bool   $page = null, // 是否分页
+        public readonly ?array  $data = null, // 响应data数据模型
     )
     {
     }
