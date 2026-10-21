@@ -23,8 +23,8 @@ return [
         ],
         // 认证
         'auth' => [
-            'type' => 1, // 类型：[1:Bearer 认证令牌（默认）, 2:Basic 认证, 3:自定义认证]
-            'field' => 'Authorization', // 认证字段名称
+            'type' => 'bearer', // 类型：[bearer（默认值）, basic, apiKey]
+            'apiKey' => 'X-Api-Key', // apiKey认证字段名称
         ],
         // 分页
         'pagination' => [

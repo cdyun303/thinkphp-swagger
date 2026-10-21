@@ -32,8 +32,7 @@ use Cdyun\ThinkphpSwagger\Schemas\AuthSchemas;
 class UseAuth
 {
     public function __construct(
-        public readonly ?int    $type = null,
-        public readonly ?string $field = null,
+        public readonly string $type = AuthSchemas::BEARER,
     )
     {
     }

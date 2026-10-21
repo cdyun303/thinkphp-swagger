@@ -74,7 +74,6 @@ final class ResponseSchema
         );
     }
 
-
     /**
      * 构建data数据 Property.
      */
@@ -84,7 +83,6 @@ final class ResponseSchema
             if (!$vo['property'] || !$vo['type']) {
                 throw new \RuntimeException('缺少属性或类型');
             }
-
             $example = $vo['example'] ?? Undefined::UNDEFINED;
             $description = $vo['description'] ?? Undefined::UNDEFINED;
             $properties = $vo['properties'] ?? null;

@@ -11,60 +11,71 @@ namespace Cdyun\ThinkphpSwagger\Schemas;
 
 use Cdyun\ThinkphpSwagger\Swagger;
 
-/**
- * Authorization认证 Schema 定义：集中管理所有可用认证方案。
- */
+
 final class AuthSchemas
 {
-    public const TYPE = 1;
-    public const FIELD = 'Authorization';
+    public const BEARER = 'bearer';
+    public const API_KEY = 'apiKey';
+    public const BASIC = 'basic';
+    public const DEFAULT = self::BEARER;
 
-    private static function getDefaultType(?int $type = null)
+    public const SCHEME_KEY_BEARER = 'BearerAuth';
+    public const SCHEME_KEY_API_KEY = 'ApiKeyAuth';
+    public const SCHEME_KEY_BASIC = 'BasicAuth';
+
+    public const API_KEY_FIELD = 'X-Api-Key';
+
+    /**
+     * @return array<string, array{key: string, type: string, description: string, scheme?: string, bearerFormat?: string, in?: string, name?: string}>
+     */
+    public static function securitySchemes(): array
     {
         $swagger = new Swagger();
-        return $type ?? $swagger->configure('processor.auth.type', self::TYPE);
+        return [
+            self::BEARER => [
+                'key' => self::SCHEME_KEY_BEARER,
+                'type' => 'http',
+                'scheme' => 'bearer',
+                'bearerFormat' => 'JWT',
+                'description' => 'Bearer 认证（JWT 令牌）',
+            ],
+            self::API_KEY => [
+                'key' => self::SCHEME_KEY_API_KEY,
+                'type' => 'apiKey',
+                'in' => 'header',
+                'name' => $swagger->configure('processor.auth.apiKey', self::API_KEY_FIELD),
+                'description' => 'API Key 认证',
+            ],
+            self::BASIC => [
+                'key' => self::SCHEME_KEY_BASIC,
+                'type' => 'http',
+                'scheme' => 'basic',
+                'description' => 'Basic 认证（Base64 编码的 user:pass）',
+            ],
+        ];
     }
 
-    private static function getDefaultField(?string $field = null)
+    public static function has(string $type): bool
     {
-        $swagger = new Swagger();
-        return $field ?? $swagger->configure('processor.auth.field', self::FIELD);
+        return array_key_exists($type, self::securitySchemes());
     }
 
     /**
-     * @return array{name: string, in: string, description: string, required: bool, schema: array<string, mixed>}
+     * @return array{key: string, type: string, description: string, scheme?: string, bearerFormat?: string, in?: string, name?: string}
      */
-    public static function definition(?int $type = null, ?string $field = null): array
+    public static function securityScheme(?string $type = null): array
     {
-        $type = self::getDefaultType($type);
-        $field = self::getDefaultField($field);
-        if ($type === 1) {
-            return [
-                'name' => $field,
-                'in' => 'header',
-                'description' => 'Bearer 认证令牌（格式：Bearer <token>）',
-                'required' => true,
-                'schema' => ['type' => 'string', 'example' => 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'],
-            ];
+        $type ??= self::DEFAULT;
+        $schemes = self::securitySchemes();
+        if (!isset($schemes[$type])) {
+            throw new \InvalidArgumentException(sprintf('未知的认证方式: %s', $type));
         }
-        if ($type === 2) {
-            return [
-                'name' => $field,
-                'in' => 'header',
-                'description' => 'Basic 认证（格式：Basic <base64(user:pass)>）',
-                'required' => true,
-                'schema' => ['type' => 'string', 'example' => 'Basic dXNlcjpwYXNz'],
-            ];
-        }
-        if ($type === 3) {
-            return [
-                'name' => $field,
-                'in' => 'header',
-                'description' => 'API Key 认证',
-                'required' => true,
-                'schema' => ['type' => 'string', 'example' => 'a1b2c3d4e5f6'],
-            ];
-        }
-        throw new \InvalidArgumentException(sprintf('未知的认证方式: %s', $type));
+
+        return $schemes[$type];
+    }
+
+    public static function schemeKey(string $type): string
+    {
+        return self::securityScheme($type)['key'];
     }
 }
